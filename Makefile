@@ -1,6 +1,11 @@
 .DEFAULT_GOAL := all
 
+# Cleanup needs no toolchain configuration; every build still requires it.
+ifeq ($(strip $(MAKECMDGOALS)),clean)
+-include config.mk
+else
 include config.mk
+endif
 
 NVCC ?= nvcc
 NVCCFLAGS ?= -O2 -std=c++17

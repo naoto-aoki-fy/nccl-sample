@@ -106,7 +106,9 @@ int run() {
     CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&device_input), bytes));
     CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&device_output), bytes));
     CUDA_CHECK(cudaStreamCreate(&stream));
-    CUDA_CHECK(cudaMemcpy(device_input, input.data(), bytes, cudaMemcpyHostToDevice));
+    // Queue the input copy and reduction on the same stream to order them.
+    CUDA_CHECK(cudaMemcpyAsync(device_input, input.data(), bytes,
+                               cudaMemcpyHostToDevice, stream));
     NCCL_CHECK(ncclAllReduce(device_input, device_output, count, ncclFloat,
                              ncclSum, comm, stream));
     CUDA_CHECK(cudaStreamSynchronize(stream));
